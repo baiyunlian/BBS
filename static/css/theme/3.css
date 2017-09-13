@@ -1,0 +1,88 @@
+body{
+    background-image: url('/static/imgs/bules.jpg');
+}
+/*顶部标题*/
+.pg-header{
+    height: 80px;
+    position: relative;
+    color: #ffffff;
+    border:2px solid #6FA5DB;
+}
+
+.pg-header .title{
+    font-size: 30px;
+    line-height: 60px;
+    margin-left: 20px;
+}
+.pg-header .menu-list{
+    position: absolute;
+    bottom: 0;
+    right: 20px;
+}
+/*右边管理菜单*/
+.pg-header .menu-list a{
+    color: #ffffff;
+    display: inline-block;
+    padding: 3px 5px;
+    margin: 0 5px;
+    /*background-color: #006699;*/
+    border:1px dotted #2F72AB;
+}
+
+.pg-body{
+    min-width: 980px;
+    position: relative;
+}
+.pg-body .body-menu{
+    position: absolute;
+    left: 0;
+    width: 280px;
+}
+.pg-body .body-content{
+    position: absolute;
+    right: 0;
+    left: 280px;
+    /*overflow: scroll;*/
+}
+
+.pg-body .body-content .art-title{
+    font-size: 24px;
+    font-weight: bold;
+    border-bottom: 1px solid #dddddd;
+    padding: 5px;
+}
+.pg-body .body-content .art-content{
+    font-size: 12px;
+}
+.pg-body .body-content .art-comment .comment-list {
+    padding: 5px;
+}
+.pg-body .body-content .art-comment .comment-list .comment-item{
+    border-bottom: 1px solid #dddddd;
+
+}
+.pg-body .body-content .art-comment .comment-list .reply-title{
+    margin: 5px 0;
+}
+.pg-body .body-content .art-comment .comment-list .reply-title .user-info{
+    float: left;
+}
+.pg-body .body-content .art-comment .comment-list .reply-title .reply{
+    float: right;
+}
+
+/*博主信息*/
+.pg-body .body-menu .notice .notice-header,
+.pg-body .body-menu .tags .tags-header,
+.pg-body .body-menu .types .types-header,
+.pg-body .body-menu .dates .dates-header
+{
+    color: #ffffff;
+
+}
+a{
+    color: #9a9afb;
+}
+li,div{
+    color: #843534;
+}

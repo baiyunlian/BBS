@@ -1,0 +1,248 @@
+{% extends 'master/backend_layout.html' %}
+{% block css %}
+    <link rel="stylesheet" href="/static/css/account.css"/>
+    <style>
+        .form-horizontal .control-label {
+            padding-top: 7px;
+            margin-bottom: 0;
+            text-align: right;
+        }
+
+        .avatar-container {
+            height: 200px;
+            width: 200px;
+            padding: 2px;
+            border: 1px solid #dddddd;
+            position: relative;
+        }
+
+        .avatar-container img {
+            height: 100%;
+            width: 100%;
+            border: 0;
+            overflow: hidden;
+        }
+
+        .avatar-container .text {
+            text-align: center;
+        }
+
+        .avatar-container .img-file {
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            position: absolute;
+            z-index: 102;
+        }
+    .ts{
+        position: absolute;
+        left: 100px;
+        top: 0;
+
+        width: 160px;
+
+    }
+    .col-xs-10{
+        position: relative;
+    }
+    </style>
+{% endblock %}
+{% block conent %}
+    <ol class="breadcrumb">
+        <li><a href="#">用户管理</a></li>
+        <li class="active">用户信息</li>
+    </ol>
+    <div>
+
+        <div class="row" style="position: relative;">
+            <form class="form-horizontal" id="fm" role="form" method="POST">
+            {% csrf_token %}
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label">用户名</label>
+                        <div class="col-xs-5">
+                            <p class="form-control-static">{{ request.session.user_info.username }}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label">邮箱</label>
+
+                        <div class="col-xs-5">
+                            <p class="form-control-static">{{ request.session.user_info.email }}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="nickname" class="col-xs-2 control-label">昵称</label>
+                        <div class="col-xs-5">
+                        {% if request.session.user_info.username == request.session.user_info.nickname %}
+                            <input type="text" class="form-control" name="nickname" id="nickname" placeholder="请输入昵称">
+                        {% else %}
+                            <input type="text" class="form-control" name="nickname" id="nickname" value="{{ request.session.user_info.nickname }}">
+                        {% endif %}
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label for="blogUrl" class="col-xs-2 control-label">博客地址</label>
+
+                        <div class="col-xs-5">
+                            {% if blog_info %}
+                                 <input type="text" class="form-control" id="blogUrl" name="urls"
+                                   placeholder="" value="{{ blog_info.urls }}">
+                                {% else %}
+                                <input type="text" class="form-control" id="blogUrl" name="urls"
+                                   placeholder="如：wupeiqi,则个人博客为http://www.xxx.com/wupeiqi.html">
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blogTheme" class="col-xs-2 control-label">博客主题</label>
+
+                        <div class="col-xs-5">
+                            <select id="blogTheme" class="form-control" name="theme" >
+                                {% for foo in blog_info_list %}
+                                    {% if blog_info.theme_id == foo.nid  %}
+                                        <option value="{{ foo.nid }}" selected="selected">{{ foo.themename }}</option>
+                                    {% else %}
+                                        <option value="{{ foo.nid }}">{{ foo.themename }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blogTitle" class="col-xs-2 control-label">博客标题内容</label>
+
+                        <div class="col-xs-8">
+                            {% if blog_info %}
+                                <textarea id="blogTitle" style="min-height: 100px" class="form-control" name="title"
+                                      placeholder="">{{ blog_info.title }}</textarea>
+                            {% else %}
+                            <textarea id="blogTitle" style="min-height: 100px" class="form-control" name="title"
+                                      placeholder="来一杯鸡汤..."></textarea>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-xs-offset-2 col-xs-10">
+                            <button type="button" class="btn btn-primary" id="saves">保 存</button>
+                            <div class="alert alert-danger hide ts">
+                                <span id="sppwd"></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </form>
+            <div style="position: absolute;" class="col-xs-offset-7 col-xs-5">
+                <div class="avatar-container">
+                    <iframe style="display: none;" id="upload_iframe" name="upload_iframe"></iframe>
+                    <form method="POST" action="/backend/upload-avatar.html" enctype="multipart/form-data"
+                          target="upload_iframe">
+                        {% csrf_token %}
+                        <img id="previewImg" origin="/static/imgs/avatar/default.png"
+                             src="/static/imgs/avatar/{{ request.session.user_info.avatar}}"
+                             style="border-radius: 50%;">
+
+                        <div class="text">点击图片更换(<a href="#">撤销</a>)</div>
+                        <input id="avatarImg" name="avatar_img" type="file" class="img-file"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        $(function () {
+            bindChangeAvatar4();
+            saves();
+        });
+        function saves(){
+            $('#saves').click(function(){
+                var nickname=$('#nickname').val();//获取昵称
+                var blogrul=$('#blogUrl').val();//获取博客地址
+                var blogtheme=$('#blogTheme').val();//获取博客主题
+                var blogTitle=$('#blogTitle').val();//获取博客标题
+                var spuser=$('#sppwd');
+                spuser.parent().addClass('hide');
+                $.ajax({
+                    url: '/backend/base-info.html',
+                    type: 'POST',
+                    data: $('#fm').serialize(),//表单所有内容
+                    dataType: 'JSON',
+                    success: function (arg) {
+                        if(arg.status){
+
+                        }else {
+                            spuser.parent().removeClass('hide');
+                            spuser.text(arg.error.title[0].messages+'\t'+arg.error.urls[0].messages);
+                        }
+                    }
+                })
+
+            })
+        }
+
+/*
+        function bindChangeAvatar1() {
+            $('#avatarImg').change(function () {
+                var file_obj = $(this)[0].files[0];
+                $('#prevViewImg')[0].src = window.URL.createObjectURL(file_obj)
+            })
+        }
+
+        function bindChangeAvatar2() {
+            $('#avatarImg').change(function () {
+                var file_obj = $(this)[0].files[0];
+                var reader = new FileReader();
+                reader.readAsDataURL(file_obj);
+                reader.onload = function (e) {
+                    $('#previewImg')[0].src = this.result;
+                };
+            })
+        }
+
+        function bindChangeAvatar3() {
+            $('#avatarImg').change(function () {
+                var file_obj = $(this)[0].files[0];
+                var form = new FormData();
+                form.add('img_upload', file_obj);
+
+                $.ajax({
+                    url: '',
+                    data: form,
+                    processData: false,  // tell jQuery not to process the data
+                    contentType: false,  // tell jQuery not to set contentType
+                    success: function (arg) {
+
+                    }
+                })
+            })
+        }
+        */
+        //点击更换头像
+        function bindChangeAvatar4() {
+            $('#avatarImg').change(function () {
+                $(this).parent().submit();
+
+                $('#upload_iframe').load(function () {
+                    var iframeContents = this.contentWindow.document.body.innerText;
+                    iframeContents = JSON.parse(iframeContents);
+                    if (iframeContents.status) {
+                        $('#previewImg').attr('src', '/' + iframeContents.data);
+                    }
+                })
+
+            })
+        }
+
+    </script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'master/home_layout.html' %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="title-list">
+        {% for row in article_list %}
+        <div class="row-item">
+            <div class="title">
+
+                <input type="text" class="hide" value="{{ row.nid }}">
+                <a href="/{{ blog.site }}/{{ row.nid }}.html" class="red_count">{{ row.title }}</a>
+{#                <a class="red_count">{{ row.title }}</a>#}
+                <input type="text" class="hide" value="{{ blog.site }}">
+            </div>
+            <div class="tips">
+                <span>{{ blog.user.nickname }}</span>
+                <span>{{ row.create_time|date:"Y-m-d H:i:s" }} </span>
+                <span>
+                    <i class="fa fa-commenting-o" aria-hidden="true"></i>
+                    <span>{{ row.comment_count }}</span>
+                </span>
+                <span>
+                    <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                    <span>{{ row.up_count }}</span>
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+    $('.red_count').click(function(){
+        var nid=$(this).prev().val();
+
+        //alert($url);
+        URL=window.location.pathname;
+        //alert(URL);
+        $.ajax({
+            url: URL,
+            type: 'POST',
+            data: {'nid':nid},//
+            dataType: 'JSON',
+            headers:{'X-CSRFtoken':$.cookie('csrftoken')},
+            success: function (arg) {
+                //alert(arg.urls);
+                if(arg.edi){
+                    //alert(arg.urls);
+                    //location.href=arg.urls
+                }else {
+
+                }
+            }
+        })
+    })
+
+    </script>
+{% endblock %}

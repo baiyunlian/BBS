@@ -1,0 +1,188 @@
+{% extends 'master/backend_layout.html' %}
+{% block css %}
+
+{% endblock %}
+{% block conent %}
+    <ol class="breadcrumb">
+
+        <li><a href="#">分类管理</a></li>
+        <li class="active">分类列表</li>
+    </ol>
+    <div>
+        <div class="row" style="padding: 20px 5px;">
+            <form class="form-horizontal" id="catefm" method="POST">
+                {% csrf_token %}
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label class="col-xs-1 control-label">分类名称</label>
+
+                        <div class="col-xs-3">
+                            <input type="text" class="form-control" id="nickname" placeholder="请输入分类名称">
+                        </div>
+                        <div class="col-xs-3">
+                            <input type="button" class="btn btn-primary" id="submit" value="添 加">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div style="height: 35px;background-color: #f5f5f5;line-height: 35px;padding: 0 15px;">
+            <i class="fa fa-table" aria-hidden="true"></i>
+            标签列表
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>分类</th>
+                <th>文章个数</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+
+{#            <!-- {% for k,v in article_count.items %}-->#}
+            {% for itme in result %}
+            <tr>
+                <td class="title">
+                    <span>{{ itme.title }}</span>
+                    <input type="text" class="hide">
+                </td>
+                {% for k,v in article_count.items %}
+                    {% if itme.title == k %}
+                        <td>{{ v}}</td>
+                    {% endif %}
+
+                {% endfor %}
+
+
+                <td>
+                    <a class="btn btn-danger btn-xs del_cate">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                        删除
+                    </a>
+                    |
+                    <a class="btn btn-primary btn-xs edi_cate">
+                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        编辑
+                    </a>
+                    <a class="btn btn-primary btn-xs confirm hide">
+                        <i class="fa fa-pencil-square-i" aria-hidden="true"></i>
+                        确认
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+        <div class="clearfix">
+            <ul class="pagination right" style="margin-top: 0">
+                {{ page_str }}
+            </ul>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+   $(function() {
+        //
+       adds();
+        $.ajaxSetup({//当前所有ajax发送 全局
+            beforeSend: function (xhr, settings) {//发送ajax前 先执行这个函数
+                xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'));
+            }
+        });
+    });
+
+   //添加分类
+   function adds(){
+    $('#submit').click(function(){
+        var nickname=$('#nickname').val();
+
+        $.ajax({
+                url: '/backend/category.html',
+                type: 'POST',
+                data: {'nickname':nickname},//
+                dataType: 'JSON',
+                //headers:{'X-CSRFtoken':$.cookie('csrftoken')},
+                success: function (arg) {
+                    if(arg.status){
+                        parent.location.reload();//刷新父亲对象（用于框架）
+                    }else {
+
+                    }
+                }
+            })
+
+    });
+   }
+
+   //删除分类
+    $('.del_cate').click(function(){
+        //       父级的     父级   的子级 类名为 title 的子级 span 的内容
+        s=$(this).parent().parent().children(".title").children("span").text();
+        alert(s);
+        $.ajax({
+            url: '/backend/category.html',
+            type: 'POST',
+            data: {'data':s},//
+            dataType: 'JSON',
+            //headers:{'X-CSRFtoken':$.cookie('csrftoken')},
+            success: function (arg) {
+                if(arg.del){
+                    parent.location.reload();//刷新父亲对象（用于框架）
+                }else {
+                }
+            }
+        })
+    });
+
+    //编辑分类
+    $('.edi_cate').click(function(){
+        var n=$(this);
+        n.parent().children(".del_cate").addClass('hide');//隐藏
+        n.next().removeClass('hide');
+        n.addClass('hide');//隐藏
+        //获取到分类的元素
+        var s=$(this).parent().parent().children(".title");
+        var $text=s.text();//分类名
+        s.children('span').addClass('hide');//隐藏
+        s.children('input').removeClass('hide');//显示
+        //s.children('input').val($text);//显示
+
+    });
+    //确认
+    $('.confirm').click(function(){
+        var n=$(this);//当前元素
+        //获取到分类的元素
+        var s=$(this).parent().parent().children(".title");
+        var $text=s.children("span").text();//分类名 旧
+        var $text2=s.children('input').val();//分类名 新
+        $.ajax({
+            url: '/backend/category.html',
+            type: 'POST',
+            data: {'oldname':$text,'newname':$text2},//
+            dataType: 'JSON',
+            //headers:{'X-CSRFtoken':$.cookie('csrftoken')},
+            success: function (arg) {
+                if(arg.edi){
+                    var $text=s.children("span").text($text2);//分类名 旧
+                    s.children('span').removeClass('hide');//显示分类
+                    s.children('input').addClass('hide');//隐藏 input
+                    n.parent().children(".del_cate").removeClass('hide');//显示
+                    n.parent().children(".edi_cate").removeClass('hide');//显示
+                    n.addClass('hide');//隐藏
+                }else {
+                    parent.location.reload();//刷新父亲对象（用于框架）
+                }
+            }
+        })
+    });
+    </script>
+{% endblock %}

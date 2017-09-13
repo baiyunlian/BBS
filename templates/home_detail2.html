@@ -1,0 +1,161 @@
+{% extends 'master/home_layout.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="/static/plugins/kindeditor/themes/default/default.css"/>
+    <link rel="stylesheet" href="/static/css/theme/{{ blog.theme_id }}.css"/>
+{% endblock %}
+
+{% block content %}
+    <div class="art-title">
+        <a>{{ article.title }}</a>
+    </div>
+    <div class="art-content">
+        {{ article.articledetail.content|safe }}
+    </div>
+    <div class="art-recommend clearfix">
+        <span class="hide" id="artid"> {{ article.nid }}</span>
+        <div class="recommend" >
+            <a href="/{{ blog.site }}/{{ article.nid }}.html?up_count={{ article.up_count }}&nid={{ article.nid }}" class="up"
+               style="margin: 5px 10px;display: inline-block;padding: 5px 15px;border: 1px solid #dddddd;text-align: center;">
+                <i class="fa fa-thumbs-o-up fa-3" aria-hidden="true" style="font-size: 25px"></i>
+
+                <div>{{ article.up_count }}</div>
+            </a>
+            <a href="/{{ blog.site }}/{{ article.nid }}.html?down_count={{ article.down_count }}&nid={{ article.nid }}" class="down"
+               style="margin: 5px 30px 5px 10px;display: inline-block;padding: 5px 15px;border: 1px solid #dddddd;text-align: center;">
+                <i class="fa fa-thumbs-o-down fa-3" aria-hidden="true" style="font-size: 25px"></i>
+
+                <div>{{ article.down_count }}</div>
+            </a>
+        </div>
+    </div>
+    <div class="art-tips clearfix">
+        <div class="tips">
+            <span class="ctime">{{ article.create_time }}</span>
+            <a class="author">{{ blog.user.nickname }}</a>
+            <span class="comment-count">评论({{ article.comment_count }})</span>
+            <span class="read-count">阅读({{ article.read_count }})</span>
+        </div>
+    </div>
+    <div id="AllanboltSignature">
+        <div style="border-bottom: #e0e0e0 1px dashed; border-left: #e0e0e0 1px dashed; padding: 10px; font-family: 微软雅黑; font-size: 11px; border-top: #e0e0e0 1px dashed; border-right: #e0e0e0 1px dashed; "
+             id="PSignature">
+            <div style="float:left;width:70px;">
+                <img src="/static/imgs/o_Warning.png" style="width:65px;height:65px">
+            </div>
+            <div style="float:left;padding-top:10px;">
+
+                <div style="padding: 1px">作者：<a href="http://www.cnblogs.com/wupeiqi/"
+                                                target="_blank">{{ blog.user.nickname }}</a></div>
+                <div style="padding: 1px">出处：<a href="/{{ blog.user.username }}.html" target="_blank">http://www.uge3.cn/{{ blog.site }}.html/</a>
+                </div>cnblogs.com
+                <div style="padding: 1px">本文版权归作者所有，欢迎转载，但未经作者同意必须保留此段声明，且在文章页面明显位置给出原文连接</div>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+    <div class="art-comment">
+        <div class="comment-title">
+            评论列表
+        </div>
+        <div class="comment-list">
+
+            {% for foo in comment %}
+                <div class="comment-item">
+                    <div class="reply-title clearfix">
+                        <div class="user-info">
+                            <span class="nick">{{ foo.user.nickname}}</span>
+                            <span>{{ foo.create_time}}</span>
+                        </div>
+                        <div class="reply">
+                            <span class="hied">{{ foo.nid }}</span>
+                            <a class="calls">回复</a>
+                        </div>
+                    </div>
+                    <div class="reply-body">
+                        {% if foo.reply %}
+                            <div class="reply-user">@{{ foo.reply.user.nickname }}</div>
+                        {% endif %}
+                        <div class="content">
+                            {{ foo.content }}.
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="clearfix">
+             <!--分页-->
+            <ul class="pagination right" style="margin-top: 0">
+               {{ page_str }}
+            </ul>
+        </div>
+        <form action="/{{ blog.site }}/{{ article.nid }}.html" method="POST" novalidate>
+        {% csrf_token %}
+            <div class="comment-area">
+                <div class="replay-comment-user"></div>
+                <div class="reply-area" style="position: relative;">
+
+                    {% if not request.session.user_info %}
+                    <div style="text-align:center;line-height:200px;position: absolute;top:0;left:0;right:0;bottom: 0;background-color: rgba(255,255,255,.6)">
+                        您需要登录后才可以回帖 <a href="/login.html">登录</a> | <a href="/register.html">立即注册</a>
+                    </div>
+                    {% endif %}
+                    <textarea name="content" style="width: 100%;height:200px;visibility:hidden;" id="texts"></textarea>
+
+                </div>
+                <div>
+                    <span class="hide" id="sreply"></span>
+                    <input type="text" class="hide" id="reply" name="reply">
+                    <div class="reply-btn">
+{#                        <span><span>21</span>/255字</span>#}
+                        <input type="submit" class="btn btn-primary" value="发表回复">
+{#                        <a class="btn btn-primary" id="call">发表回复</a>#}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script charset="utf-8" src="/static/plugins/kindeditor/kindeditor-min.js"></script>
+    <script charset="utf-8" src="/static/plugins/kindeditor/lang/zh_CN.js"></script>
+    <script>
+        var editor;
+        //插件
+        KindEditor.ready(function (K) {
+            editor = K.create('textarea[name="content"]', {
+                resizeType: 1,
+                allowPreviewEmoticons: false,
+                allowImageUpload: false,
+                items: [
+                    'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+                    'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+                    'insertunorderedlist', '|', 'emoticons', 'image', 'link']
+            });
+        });
+    $(function() {
+        //
+        $.ajaxSetup({//当前所有ajax发送 全局
+            beforeSend: function (xhr, settings) {//发送ajax前 先执行这个函数
+                xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'));
+            }
+        });
+    });
+
+    $('.calls').click(function(){
+        var s=$(this).parent().children('span').text();//要@的回复
+        //                  父级 的上的兄弟的下级们
+        var nickname=$(this).parent().prev().children('.nick').text();
+        //alert(nickname);
+        var n = $('#reply').val(s);//回复的id
+        var sp=$('#sreply').removeClass('hide');//显示回复的昵称
+        sp.text('@'+nickname);
+        n.val(s);
+        var m=$('textarea[name="content"]').value(s);
+        alert(m);
+    })
+    </script>
+{% endblock %}

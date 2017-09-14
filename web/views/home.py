@@ -55,8 +55,10 @@ def index(request, *args, **kwargs):
     #分页
     page_str = page_obj.page_str(base_url)
     if request.method=='POST':
+
         nid=request.POST.get('nid')#文章ID
         read_count=models.Article.objects.filter(nid=nid).first()
+        #with transaction.atomic():#事务操作
         read_count=int(read_count.read_count)+1#阅读数
         models.Article.objects.filter(nid=nid).update(read_count=read_count)#阅读数加1
 
@@ -236,8 +238,9 @@ def detail(request, site, nid,**kwargs):
             obj=models.UpDown.objects.filter(article_id=nid,user_id=user).count()
             if not obj:
                 up_count=int(up_count)+1
-                models.UpDown.objects.create(article_id=nid,user_id=user,up=True)#点赞
-                models.Article.objects.filter(nid=nid).update(up_count=up_count)#文章点赞数更新
+                with transaction.atomic():#事务操作
+                    models.UpDown.objects.create(article_id=nid,user_id=user,up=True)#点赞
+                    models.Article.objects.filter(nid=nid).update(up_count=up_count)#文章点赞数更新
                 ret['edi']=True
                 ret['up_count']=up_count
                 return HttpResponse(json.dumps(ret))
@@ -245,8 +248,9 @@ def detail(request, site, nid,**kwargs):
             obj=models.UpDown.objects.filter(article_id=nid,user_id=user).count()
             if not obj:
                 down_count=int(down_count)+1
-                models.UpDown.objects.create(article_id=nid,user_id=user,up=True)#点赞
-                models.Article.objects.filter(nid=nid).update(down_count=down_count)#文章点踩数更新
+                with transaction.atomic():#事务操作
+                    models.UpDown.objects.create(article_id=nid,user_id=user,up=True)#点赞
+                    models.Article.objects.filter(nid=nid).update(down_count=down_count)#文章点踩数更新
                 ret['edi']=True
                 ret['down_count']=down_count
                 return HttpResponse(json.dumps(ret))

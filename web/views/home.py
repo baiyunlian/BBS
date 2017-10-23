@@ -227,7 +227,8 @@ def detail(request, site, nid,**kwargs):
     page_str = page_obj.page_str(base_url)
     #up_count=request.GET.get('up_count')#文章当前点赞数
     #down_count=request.GET.get('down_count')#文章当前点踩数
-    user=request.session['user_info']['nid']#点赞用户ID
+	if request.session.get('user_info'):
+		user=request.session['user_info']['nid']#点赞用户ID
     ret={'edi':False}
                 #return redirect('/'+site+'/'+art_nid+'.html')
     if request.method=='POST':
